@@ -1,0 +1,14 @@
+# Chest Protection Configuration
+chestProtection:
+  enabled: true  # Enable or disable chest protection
+  messages:
+    cannotBreakProtectedChest: "§cYou cannot break this chest as it contains a shop owned by someone else!"
+    shopRemoved: "§aYour shop has been removed as you broke the chest."
+    cannotBreakAdjacent: "§cYou cannot break blocks adjacent to a shop chest owned by someone else!"
+    cannotPlaceAdjacent: "§cYou cannot place a chest next to a protected shop chest!"
+    cannotPlaceHopper: "§cYou cannot place a hopper below a protected shop chest!"
+    cannotPlaceAdjacentBlock: "§cYou cannot place blocks adjacent to a shop chest owned by someone else!"
+    cannotUseHopper: "§cYou cannot use hoppers with a protected shop chest!"
+    cannotUseRedstone: "§cYou cannot use redstone components with a protected shop chest!"
+    shopAlert: "§6[Shop Alert] §cYour shop at §f{x}, {y}, {z} §cis out of stock §f({item})§c!"
+    shopFullAlert: "§6[Shop Alert] §cYour shop at §f{x}, {y}, {z} §cis full and cannot accept payments!"

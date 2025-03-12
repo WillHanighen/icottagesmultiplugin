@@ -1,0 +1,30 @@
+name: iCottageSMultiPlugin
+version: 0.011-BETA
+main: dev.cottage.iCottageSMultiPlugin.iCottageSMultiPlugin
+api-version: 1.21
+commands:
+  createshop:
+    description: Creates a new chest shop.
+    usage: /createshop <sellItem> <buyItem> <sellAmount> <buyAmount>
+    permission: icottagesmulti.createshop
+    permission-message: You don't have permission to create a chest shop.
+  removeshop:
+    description: Removes the chest shop at the location you are looking at.
+    usage: /removeshop
+    permission: icottagesmulti.removeshop
+    permission-message: You don't have permission to remove a chest shop.
+  shops:
+    description: Lists all shops in your current dimension, sorted by proximity or item.
+    usage: /shops [proximity|item [itemName]]
+    permission: icottagesmulti.listshops
+    permission-message: You don't have permission to list chest shops.
+permissions:
+  icottagesmulti.createshop:
+    description: Allows the user to create chest shops.
+    default: true
+  icottagesmulti.removeshop:
+    description: Allows the user to remove chest shops.
+    default: true
+  icottagesmulti.listshops:
+    description: Allows the user to list all shops.
+    default: true
