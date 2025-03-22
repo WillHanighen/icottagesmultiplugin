@@ -224,6 +224,7 @@ class iCottageSMultiPlugin : JavaPlugin() {
 
     // Method to load chest shops
     fun loadChestShops() {
+        // yippi
         try {
             val file = File(dataFolder, "chestShops.json")
             if (!file.exists()) return
