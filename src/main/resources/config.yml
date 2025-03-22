@@ -1,3 +1,8 @@
+# Enable/disable plugin features
+
+chestShop:
+  enabled: true
+
 # Chest Protection Configuration
 chestProtection:
   enabled: true  # Enable or disable chest protection

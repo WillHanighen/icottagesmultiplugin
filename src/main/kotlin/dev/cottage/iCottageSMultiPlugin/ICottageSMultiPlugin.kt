@@ -25,6 +25,10 @@ class iCottageSMultiPlugin : JavaPlugin() {
     private lateinit var config: FileConfiguration
     private var debugMode: Boolean = false
 
+    // Feature toggle flags
+    private var chestShopEnabled: Boolean = true
+    private var chestProtectionEnabled: Boolean = true
+
     companion object {
         lateinit var instance: iCottageSMultiPlugin
         val chestShops = mutableListOf<ChestShop>()
@@ -43,41 +47,40 @@ class iCottageSMultiPlugin : JavaPlugin() {
         // Load configuration
         loadConfig()
 
-        val plugin = this
-        // Register listeners with high priority for protection
-        server.pluginManager.registerEvents(ChestShopListener(), this)
-        server.pluginManager.registerEvents(ChestProtectionListener(), this)
-
         // Create data folder if it doesn't exist
         if (!dataFolder.exists()) {
             dataFolder.mkdir()
         }
 
-        // Register commands
-        getCommand("createshop")?.setExecutor(CreateShopCommand())
-        getCommand("createshop")?.tabCompleter = CreateShopTabCompleter()
-        getCommand("removeshop")?.setExecutor(RemoveShopCommand())
-        getCommand("shops")?.setExecutor(ListShopsCommand())
-        getCommand("shops")?.tabCompleter = ListShopsTabCompleter()
-
-        // Load chest shops from file/database
-        loadChestShops()
+        // Initialize features based on configuration
+        initializeFeatures()
 
         logger.info("iCottageSMultiPlugin enabled!")
 
         if (debugMode) {
             logger.info("Debug mode enabled")
-            logger.info("Protection settings:")
-            logger.info("- Protect adjacent blocks: $protectAdjacentBlocks")
-            logger.info("- Prevent hopper interaction: $preventHopperInteraction")
-            logger.info("- Prevent explosion damage: $preventExplosionDamage")
-            logger.info("Loaded ${chestShops.size} chest shops")
+            logger.info("Features enabled:")
+            logger.info("- Chest Shop: $chestShopEnabled")
+            logger.info("- Chest Protection: $chestProtectionEnabled")
+
+            if (chestProtectionEnabled) {
+                logger.info("Protection settings:")
+                logger.info("- Protect adjacent blocks: $protectAdjacentBlocks")
+                logger.info("- Prevent hopper interaction: $preventHopperInteraction")
+                logger.info("- Prevent explosion damage: $preventExplosionDamage")
+            }
+
+            if (chestShopEnabled) {
+                logger.info("Loaded ${chestShops.size} chest shops")
+            }
         }
     }
 
     override fun onDisable() {
-        // Save chest shops to file/database
-        saveChestShops()
+        // Save chest shops to file/database if the feature is enabled
+        if (chestShopEnabled) {
+            saveChestShops()
+        }
         logger.info("iCottageSMultiPlugin disabled!")
     }
 
@@ -89,19 +92,63 @@ class iCottageSMultiPlugin : JavaPlugin() {
         reloadConfig()
         config = getConfig()
 
-        // Load settings
+        // Load general settings
         debugMode = config.getBoolean("debug-mode", false)
-        protectAdjacentBlocks = config.getBoolean("protection.adjacent-blocks", true)
-        preventHopperInteraction = config.getBoolean("protection.hopper-interaction", true)
-        preventExplosionDamage = config.getBoolean("protection.explosion-damage", true)
+
+        // Load feature toggles
+        chestShopEnabled = config.getBoolean("chestShop.enabled", true)
+        chestProtectionEnabled = config.getBoolean("chestProtection.enabled", true)
+
+        // Load protection settings if protection is enabled
+        if (chestProtectionEnabled) {
+            protectAdjacentBlocks = config.getBoolean("protection.adjacent-blocks", true)
+            preventHopperInteraction = config.getBoolean("protection.hopper-interaction", true)
+            preventExplosionDamage = config.getBoolean("protection.explosion-damage", true)
+        }
 
         // Create default config if it doesn't exist
         if (!File(dataFolder, "config.yml").exists()) {
             config.set("debug-mode", false)
+            config.set("chestShop.enabled", true)
+            config.set("chestProtection.enabled", true)
             config.set("protection.adjacent-blocks", true)
             config.set("protection.hopper-interaction", true)
             config.set("protection.explosion-damage", true)
             saveConfig()
+        }
+    }
+
+    private fun initializeFeatures() {
+        val plugin = this
+
+        // Initialize chest shop feature if enabled
+        if (chestShopEnabled) {
+            debug("Initializing chest shop feature")
+
+            // Register chest shop listener
+            server.pluginManager.registerEvents(ChestShopListener(), this)
+
+            // Register chest shop commands
+            getCommand("createshop")?.setExecutor(CreateShopCommand())
+            getCommand("createshop")?.tabCompleter = CreateShopTabCompleter()
+            getCommand("removeshop")?.setExecutor(RemoveShopCommand())
+            getCommand("shops")?.setExecutor(ListShopsCommand())
+            getCommand("shops")?.tabCompleter = ListShopsTabCompleter()
+
+            // Load chest shops from file/database
+            loadChestShops()
+        } else {
+            debug("Chest shop feature is disabled")
+        }
+
+        // Initialize chest protection feature if enabled
+        if (chestProtectionEnabled) {
+            debug("Initializing chest protection feature")
+
+            // Register chest protection listener
+            server.pluginManager.registerEvents(ChestProtectionListener(), this)
+        } else {
+            debug("Chest protection feature is disabled")
         }
     }
 
@@ -169,11 +216,13 @@ class iCottageSMultiPlugin : JavaPlugin() {
 
     // Utility function to check if a chest shop exists at a location
     fun hasShopAt(chestLocation: String): Boolean {
+        if (!chestShopEnabled) return false
         return chestShops.any { it.chestLocation == chestLocation }
     }
 
     // Utility function to get a shop at a location
     fun getShopAt(chestLocation: String): ChestShop? {
+        if (!chestShopEnabled) return null
         return chestShops.find { it.chestLocation == chestLocation }
     }
 
@@ -195,5 +244,14 @@ class iCottageSMultiPlugin : JavaPlugin() {
         }
 
         logger.info(ChatColor.stripColor(formattedMessage))
+    }
+
+    // Helper methods to check if features are enabled
+    fun isChestShopEnabled(): Boolean {
+        return chestShopEnabled
+    }
+
+    fun isChestProtectionEnabled(): Boolean {
+        return chestProtectionEnabled
     }
 }
