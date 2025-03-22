@@ -8,6 +8,9 @@ import dev.cottage.iCottageSMultiPlugin.chestshop.ListShopsCommand
 import dev.cottage.iCottageSMultiPlugin.chestshop.ListShopsTabCompleter
 import dev.cottage.iCottageSMultiPlugin.chestshop.CreateShopTabCompleter
 import dev.cottage.iCottageSMultiPlugin.chestshop.ChestProtectionListener
+import dev.cottage.iCottageSMultiPlugin.tpa.TPACommand
+import dev.cottage.iCottageSMultiPlugin.tpa.TPAcceptCommand
+import dev.cottage.iCottageSMultiPlugin.tpa.TPDenyCommand
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
@@ -28,6 +31,10 @@ class iCottageSMultiPlugin : JavaPlugin() {
     // Feature toggle flags
     private var chestShopEnabled: Boolean = true
     private var chestProtectionEnabled: Boolean = true
+    private var TPAEnabled: Boolean = true
+    var TPAMaxDistance: Int = -1
+    var TPACrossDimensional: Boolean = true
+    var TPATeleportDelay: Long = 5 // Default to 5 seconds
 
     companion object {
         lateinit var instance: iCottageSMultiPlugin
@@ -62,6 +69,7 @@ class iCottageSMultiPlugin : JavaPlugin() {
             logger.info("Features enabled:")
             logger.info("- Chest Shop: $chestShopEnabled")
             logger.info("- Chest Protection: $chestProtectionEnabled")
+            logger.info("- TPA: $TPAEnabled")
 
             if (chestProtectionEnabled) {
                 logger.info("Protection settings:")
@@ -72,6 +80,13 @@ class iCottageSMultiPlugin : JavaPlugin() {
 
             if (chestShopEnabled) {
                 logger.info("Loaded ${chestShops.size} chest shops")
+            }
+
+            if (TPAEnabled) {
+                logger.info("TPA settings")
+                logger.info("- maximum distance: $TPAMaxDistance")
+                logger.info("- Cross-dimensional: $TPACrossDimensional")
+                logger.info("- Teleport delay: $TPATeleportDelay seconds")
             }
         }
     }
@@ -98,12 +113,20 @@ class iCottageSMultiPlugin : JavaPlugin() {
         // Load feature toggles
         chestShopEnabled = config.getBoolean("chestShop.enabled", true)
         chestProtectionEnabled = config.getBoolean("chestProtection.enabled", true)
+        TPAEnabled = config.getBoolean("TPA.enabled", true)
 
         // Load protection settings if protection is enabled
         if (chestProtectionEnabled) {
             protectAdjacentBlocks = config.getBoolean("protection.adjacent-blocks", true)
             preventHopperInteraction = config.getBoolean("protection.hopper-interaction", true)
             preventExplosionDamage = config.getBoolean("protection.explosion-damage", true)
+        }
+
+        // Load TPA settings
+        if (TPAEnabled) {
+            TPAMaxDistance = config.getInt("TPA.max-distance", -1)
+            TPACrossDimensional = config.getBoolean("TPA.cross-dimensional", true)
+            TPATeleportDelay = config.getLong("TPA.teleport-delay", 5)
         }
 
         // Create default config if it doesn't exist
@@ -114,6 +137,10 @@ class iCottageSMultiPlugin : JavaPlugin() {
             config.set("protection.adjacent-blocks", true)
             config.set("protection.hopper-interaction", true)
             config.set("protection.explosion-damage", true)
+            config.set("TPA.enabled", true)
+            config.set("TPA.max-distance", -1)
+            config.set("TPA.cross-dimensional", true)
+            config.set("TPA.teleport-delay", 5)
             saveConfig()
         }
     }
@@ -149,6 +176,19 @@ class iCottageSMultiPlugin : JavaPlugin() {
             server.pluginManager.registerEvents(ChestProtectionListener(), this)
         } else {
             debug("Chest protection feature is disabled")
+        }
+
+        // Initialize TPA feature if enabled
+        if (TPAEnabled) {
+            debug("Initializing TPA feature")
+
+            // Register TPA commands
+            getCommand("tpa")?.setExecutor(TPACommand())
+            getCommand("tpa")?.tabCompleter = TPACommand()
+            getCommand("tpaccept")?.setExecutor(TPAcceptCommand())
+            getCommand("tpdeny")?.setExecutor(TPDenyCommand())
+        } else {
+            debug("TPA feature is disabled")
         }
     }
 
@@ -253,5 +293,9 @@ class iCottageSMultiPlugin : JavaPlugin() {
 
     fun isChestProtectionEnabled(): Boolean {
         return chestProtectionEnabled
+    }
+
+    fun isTPAEnabled(): Boolean {
+        return TPAEnabled
     }
 }

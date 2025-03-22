@@ -3,6 +3,20 @@ version: 0.011-BETA
 main: dev.cottage.iCottageSMultiPlugin.iCottageSMultiPlugin
 api-version: 1.21
 commands:
+  tpa:
+    description: Send a teleport request to another player
+    usage: /<command> <player>
+    permission: icottagesmulti.tpa.use
+
+    tpaccept:
+      description: Accept a pending teleport request
+      usage: /<command>
+      permission: icottagesmulti.tpa.use
+
+    tpdeny:
+      description: Deny a pending teleport request
+      usage: /<command>
+      permission: icottagesmulti.tpa.use
   createshop:
     description: Creates a new chest shop.
     usage: /createshop <sellItem> <buyItem> <sellAmount> <buyAmount>
@@ -27,4 +41,16 @@ permissions:
     default: true
   icottagesmulti.listshops:
     description: Allows the user to list all shops.
+    default: true
+  icottages.admin.notifications:
+    description: Receives admin notifications
+    default: op
+  icottages.tpa.use:
+    description: Allows using the TPA command
+    default: true
+  icottages.tpa.accept:
+    description: Allows accepting TPA requests
+    default: true
+  icottages.tpa.deny:
+    description: Allows denying TPA requests
     default: true

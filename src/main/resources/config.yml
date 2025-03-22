@@ -1,8 +1,10 @@
-# Enable/disable plugin features
-
 chestShop:
   enabled: true
-
+TPA:
+  enabled: true
+  max-distance: -1  # Maximum distance for teleport requests, -1 to disable
+  cross-dimensional: true  # Allow teleporting between dimensions
+  teleport-delay: 5  # Delay in seconds before teleporting the player
 # Chest Protection Configuration
 chestProtection:
   enabled: true  # Enable or disable chest protection
